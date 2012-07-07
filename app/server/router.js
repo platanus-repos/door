@@ -48,13 +48,23 @@ module.exports = function(app) {
 			else {
 				res.send(o, 200);
 				req.session.user = o;
-				request.post({
-					url:'http://localhost:4441/abretesesamo',
-					body: "",
-					headers: {'content-type' : 'application/x-www-form-urlencoded'}
-				}, function(error, response, body){
-					//TODO: mark a new access
+				if(!register){
+					// Open
+					request.post({
+						url:'http://localhost:4441/abretesesamo',
+						body: "",
+						headers: {'content-type' : 'application/x-www-form-urlencoded'}
+					}, function(error, response, body){
+						//TODO: mark a new access
+						});
+				}
+				else{
+					// Register User
+					AM.registerCard(register, req.param('pass'),function(){
+						res.send("Card Registered", 200);
+						register = undefined;
 					});
+				}
 			}
 		});
 	});
@@ -106,6 +116,9 @@ module.exports = function(app) {
 			if (e){
 				res.send(e, 400);
 			}	else{
+				// Prepare for card saving
+				if(req.param('pass') == 'register')
+					register = req.param('user');
 				res.send('ok', 200);
 			}
 		});

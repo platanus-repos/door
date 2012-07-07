@@ -55,7 +55,6 @@ AM.signup = function(newData, callback)
 	});
 };
 
-
 AM.update = function(newData, callback)
 {
 	AM.accounts.findOne({user:newData.user}, function(e, o){
@@ -70,6 +69,17 @@ AM.update = function(newData, callback)
 				AM.accounts.save(o); callback(o);	
 			});
 		}
+	});
+};
+
+AM.registerCard = function(username, cardId, callback)
+{
+	AM.accounts.findOne({user:username}, function(e, o){
+		
+		AM.saltAndHash(cardId, function(hash){
+			o.pass = hash;
+			AM.accounts.save(o); callback(o);	
+		});
 	});
 };
 
