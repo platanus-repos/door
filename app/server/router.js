@@ -2,55 +2,26 @@
 var CT = require('./modules/country-list');
 var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
+var request = require('request');
 
 module.exports = function(app) {
 
 // main login page //
 
 	app.get('/', function(req, res){
-	console.log('login', req.cookies.user, req.cookies.pass);		
-	// check if the user's credentials are saved in a cookie //
-		if (req.cookies.user == undefined || req.cookies.pass == undefined){
-			res.render('login', { locals: { title: 'Hello - Please Login To Your Account' }});
-		}	else{
-	// attempt automatic login //
-			AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
-				if (o != null){
-				    req.session.user = o;
-					res.redirect('/home');
-				}	else{
-					res.render('login', { locals: { title: 'Hello - Please Login To Your Account' }});
-				}
-			});
-		}
+		res.render('login', { locals: { title: 'Hello - Please Login To Your Account' }});
 	});
 	
 	app.post('/', function(req, res){
-		if (req.param('email') != null){
-			AM.getEmail(req.param('email'), function(o){
-				if (o){
-					res.send('ok', 200);
-					EM.send(o, function(e, m){ console.log('error : '+e, 'msg : '+m)});	
-				}	else{
-					res.send('email-not-found', 400);
-				}
-			});
-		}	else{
-		// attempt manual login //
-			AM.manualLogin(req.param('user'), req.param('pass'), function(e, o){
-				if (!o){
-					res.send(e, 400);
-				}	else{
-				    req.session.user = o;
-					if (req.param('remember-me') == 'true'){
-						res.cookie('user', o.user, { maxAge: 900000 });
-						res.cookie('pass', o.pass, { maxAge: 900000 });
-					}			
+		AM.manualLogin(req.param('pass'), function(e, o){
+			if (!o){
+				res.send(e, 400);
+			}	else {
+					req.session.user = o;
 					res.send(o, 200);
-				}
-			});
-		}
-	});	
+			}
+		});
+	});
 	
 // logged-in user homepage //
 	
@@ -67,6 +38,25 @@ module.exports = function(app) {
 				}
 			});
 	    }
+	});
+
+	app.post('/sensed', function(req, res){
+		AM.manualLogin(req.param('pass'), function(e, o){
+			if (!o){
+				res.send(e, 400);
+			}
+			else {
+				res.send(o, 200);
+				req.session.user = o;
+				request.post({
+					url:'http://apidone.com/abretesesamo',
+					body: "lala=sius",
+					headers: {'content-type' : 'application/x-www-form-urlencoded'}
+				}, function(error, response, body){
+					//TODO: mark a new access
+					});
+			}
+		});
 	});
 	
 	app.post('/home', function(req, res){
