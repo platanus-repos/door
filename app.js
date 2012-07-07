@@ -14,6 +14,6 @@ global.host = 'localhost';
 require('./app/config')(app, exp);
 require('./app/server/router')(app);
 
-app.listen(8080, function(){
+app.listen(4040, function(){
  	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });

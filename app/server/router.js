@@ -49,8 +49,8 @@ module.exports = function(app) {
 				res.send(o, 200);
 				req.session.user = o;
 				request.post({
-					url:'http://apidone.com/abretesesamo',
-					body: "lala=sius",
+					url:'http://localhost:4441/abretesesamo',
+					body: "",
 					headers: {'content-type' : 'application/x-www-form-urlencoded'}
 				}, function(error, response, body){
 					//TODO: mark a new access
