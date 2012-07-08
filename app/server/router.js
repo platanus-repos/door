@@ -3,7 +3,7 @@ var CT = require('./modules/country-list');
 var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
 var request = require('request');
-
+var register = undefined;
 module.exports = function(app) {
 
 // main login page //
@@ -41,32 +41,33 @@ module.exports = function(app) {
 	});
 
 	app.post('/sensed', function(req, res){
-		AM.manualLogin(req.param('pass'), function(e, o){
-			if (!o){
-				res.send(e, 400);
-			}
-			else {
-				res.send(o, 200);
-				req.session.user = o;
-				if(!register){
-					// Open
-					request.post({
-						url:'http://localhost:4441/abretesesamo',
-						body: "",
-						headers: {'content-type' : 'application/x-www-form-urlencoded'}
-					}, function(error, response, body){
-						//TODO: mark a new access
-						});
+		if(!register)
+		{
+			AM.manualLogin(req.param('pass'), function(e, o){
+				if (!o){
+					res.send(e, 400);
 				}
-				else{
-					// Register User
-					AM.registerCard(register, req.param('pass'),function(){
-						res.send("Card Registered", 200);
-						register = undefined;
-					});
+				else {
+					res.send(o, 200);
+					req.session.user = o;
+						// Open
+						request.post({
+							url:'http://localhost:4441/abretesesamo',
+							body: "",
+							headers: {'content-type' : 'application/x-www-form-urlencoded'}
+						}, function(error, response, body){
+							//TODO: mark a new access
+							});
 				}
-			}
-		});
+			});
+		}
+		else {
+				// Register User
+				AM.registerCard(register, req.param('pass'),function(){
+					res.send("Card Registered", 200);
+					register = undefined;
+				});
+		}
 	});
 	
 	app.post('/home', function(req, res){
@@ -160,7 +161,7 @@ module.exports = function(app) {
 	});	
 	
 	app.post('/delete', function(req, res){
-		AM.delete(req.body.id, function(e, obj){
+		AM.delete(req.param('id'), function(e, obj){
 			if (!e){
 				res.clearCookie('user');
 				res.clearCookie('pass');

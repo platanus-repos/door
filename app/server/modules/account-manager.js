@@ -24,6 +24,7 @@ module.exports = AM;
 
 AM.manualLogin = function(pass, callback)
 {
+console.log(pass);
 	AM.accounts.findOne({pass:crypto.createHash('sha256').update(pass).digest("hex")}, function(e, o) {
 		if (o == null){
 			callback('user-not-found');
